@@ -63,4 +63,4 @@ sequenceDiagram
 
 
 
-AI Disclosure: > "I utilized AI (Gemini) to assist with generating initial test case templates, refining Spring Retry syntax, and comparing concurrency strategies (Optimistic Locking vs. Unique Indexes). All core business logic, comprehensive test suites, and final system implementations were developed, debugged, and verified by me to ensure full adherence to project requirements and system correctness."
+AI Disclosure: > "I utilized AI (Gemini) to assist with writtng ADR documents, generating initial test case templates, refining Spring Retry syntax, and comparing concurrency strategies (Optimistic Locking vs. Unique Indexes). All core business logic, comprehensive test suites, and final system implementations were developed, debugged, and verified by me to ensure full adherence to project requirements and system correctness."
