@@ -5,6 +5,7 @@ spring:
   data:
     mongodb:
       database: private_dining
+      auto-index-creation: true
 
 # Embedded MongoDB Configuration
 de:
@@ -22,4 +23,13 @@ logging:
   level:
     com.opentable.privatedining: DEBUG
     org.springframework.data.mongodb: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
     de.flapdoodle.embed.mongo: INFO
+    org.springframework.retry: DEBUG
+
+# Reservation Business Rules
+reservation:
+  default-duration-mins: 90
+  operating-hours:
+    open: "09:00"
+    close: "22:00"

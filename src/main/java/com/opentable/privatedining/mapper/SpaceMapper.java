@@ -15,7 +15,8 @@ public class SpaceMapper {
                 space.getId(),
                 space.getName(),
                 space.getMinCapacity(),
-                space.getMaxCapacity()
+                space.getMaxCapacity(),
+                space.getSlotDurationMins()
         );
     }
 
@@ -27,7 +28,8 @@ public class SpaceMapper {
         return new Space(
                 spaceDTO.getName(),
                 spaceDTO.getMinCapacity(),
-                spaceDTO.getMaxCapacity()
+                spaceDTO.getMaxCapacity(),
+                spaceDTO.getSlotDurationMins()
         );
     }
 }

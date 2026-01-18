@@ -1,0 +1,111 @@
+restaurants:
+  - id: 7a2e3362bfc748527f7bf8d9
+    name: The Sunset Grill
+    address: 45 Ocean Drive
+    cuisineType: Seafood
+    capacity: 150
+    openingTime: "14:00"
+    closingTime: "23:00"
+    spaces:
+     - id: d18e176b-21d4-4ca0-9a09-0b7a9c37e92d
+       name: BalconySuite
+       minCapacity: 2
+       maxCapacity: 8
+       slotDurationMins: 120 
+     - id: e29f287c-32e5-5db1-0b1a-1c8b0d48f03e
+       name: MainDiningHall
+       minCapacity: 20
+       maxCapacity: 100
+       slotDurationMins: 90
+
+reservations:
+    #New reservation system.
+  - id: 7a2e0001bfc748527f7bf001
+    restaurantId: 7a2e3362bfc748527f7bf8d9
+    spaceId: d18e176b-21d4-4ca0-9a09-0b7a9c37e92d
+    customerEmail: alice@example.com
+    startTime: 30-01-2026 14:00
+    endTime: 30-01-2026 16:00
+    partySize: 4
+    status: CONFIRMED
+
+  - id: 7a2e0002bfc748527f7bf002
+    restaurantId: 7a2e3362bfc748527f7bf8d9
+    spaceId: d18e176b-21d4-4ca0-9a09-0b7a9c37e92d
+    customerEmail: bob@example.com
+    startTime: 30-01-2026 16:30
+    endTime: 30-01-2026 18:30
+    partySize: 2
+    status: CONFIRMED
+
+  - id: 7a2e0003bfc748527f7bf003
+    restaurantId: 7a2e3362bfc748527f7bf8d9
+    spaceId: d18e176b-21d4-4ca0-9a09-0b7a9c37e92d
+    customerEmail: charlie@example.com
+    startTime: 30-01-2026 19:00
+    endTime: 30-01-2026 21:00
+    partySize: 8
+    status: CONFIRMED
+
+  - id: 7a2e0004bfc748527f7bf004
+    restaurantId: 7a2e3362bfc748527f7bf8d9
+    spaceId: e29f287c-32e5-5db1-0b1a-1c8b0d48f03e
+    customerEmail: david@example.com
+    startTime: 30-01-2026 14:00
+    endTime: 30-01-2026 15:30
+    partySize: 25
+    status: CONFIRMED
+
+  - id: 7a2e0005bfc748527f7bf005
+    restaurantId: 7a2e3362bfc748527f7bf8d9
+    spaceId: e29f287c-32e5-5db1-0b1a-1c8b0d48f03e
+    customerEmail: eve@example.com
+    startTime: 30-01-2026 14:30
+    endTime: 30-01-2026 16:00
+    partySize: 30
+    status: CONFIRMED
+
+  - id: 7a2e0006bfc748527f7bf006
+    restaurantId: 7a2e3362bfc748527f7bf8d9
+    spaceId: e29f287c-32e5-5db1-0b1a-1c8b0d48f03e
+    customerEmail: frank@example.com
+    startTime: 30-01-2026 17:00
+    endTime: 30-01-2026 18:30
+    partySize: 50
+    status: CONFIRMED
+
+  - id: 7a2e0007bfc748527f7bf007
+    restaurantId: 7a2e3362bfc748527f7bf8d9
+    spaceId: e29f287c-32e5-5db1-0b1a-1c8b0d48f03e
+    customerEmail: grace@example.com
+    startTime: 30-01-2026 18:30
+    endTime: 30-01-2026 20:00
+    partySize: 40
+    status: CONFIRMED
+
+  - id: 7a2e0008bfc748527f7bf008
+    restaurantId: 7a2e3362bfc748527f7bf8d9
+    spaceId: e29f287c-32e5-5db1-0b1a-1c8b0d48f03e
+    customerEmail: heidi@example.com
+    startTime: 30-01-2026 19:00
+    endTime: 30-01-2026 20:30
+    partySize: 60
+    status: CONFIRMED
+
+  - id: 7a2e0009bfc748527f7bf009
+    restaurantId: 7a2e3362bfc748527f7bf8d9
+    spaceId: e29f287c-32e5-5db1-0b1a-1c8b0d48f03e
+    customerEmail: ivan@example.com
+    startTime: 30-01-2026 21:00
+    endTime: 30-01-2026 22:30
+    partySize: 20
+    status: CONFIRMED
+
+  - id: 7a2e0010bfc748527f7bf010
+    restaurantId: 7a2e3362bfc748527f7bf8d9
+    spaceId: e29f287c-32e5-5db1-0b1a-1c8b0d48f03e
+    customerEmail: julia@example.com
+    startTime: 30-01-2026 21:30
+    endTime: 30-01-2026 23:00
+    partySize: 15
+    status: CONFIRMED

@@ -1,12 +1,19 @@
 package com.opentable.privatedining.model;
 
-import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 @Document(collection = "reservations")
+@CompoundIndex(
+	    name = "unique_res_idx", 
+	    def = "{'customerEmail': 1, 'restaurantId': 1, 'spaceId': 1, 'startTime': 1}", 
+	    unique = true
+	)
 public class Reservation {
 
     @Id

@@ -2,6 +2,7 @@ package com.opentable.privatedining.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class SpaceDTO {
@@ -17,6 +18,11 @@ public class SpaceDTO {
 
     @Schema(description = "Maximum capacity for the space", example = "12")
     private Integer maxCapacity;
+    
+    @Schema(description = "Time slot duration in minutes for the space", example = "60")
+    private Integer slotDurationMins;
+    
+    private LocalDateTime endTime;
 
     public SpaceDTO() {}
 
@@ -32,8 +38,20 @@ public class SpaceDTO {
         this.minCapacity = minCapacity;
         this.maxCapacity = maxCapacity;
     }
+    
+    
+    public SpaceDTO(String name, Integer minCapacity, Integer maxCapacity, Integer slotDurationMins) {
+    	this(name, minCapacity, maxCapacity);
+		this.slotDurationMins = slotDurationMins;
+	}
 
-    public UUID getId() {
+    public SpaceDTO(UUID id, String name, Integer minCapacity, Integer maxCapacity, Integer slotDurationMins) {
+    	this(id, name, minCapacity, maxCapacity);
+		this.slotDurationMins = slotDurationMins;
+	}
+    
+
+	public UUID getId() {
         return id;
     }
 
@@ -64,4 +82,12 @@ public class SpaceDTO {
     public void setMaxCapacity(Integer maxCapacity) {
         this.maxCapacity = maxCapacity;
     }
+
+	public Integer getSlotDurationMins() {
+		return slotDurationMins;
+	}
+
+	public void setSlotDurationMins(Integer slotDurationMins) {
+		this.slotDurationMins = slotDurationMins;
+	}
 }
