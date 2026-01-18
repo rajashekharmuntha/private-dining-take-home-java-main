@@ -12,8 +12,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +29,6 @@ import com.opentable.privatedining.repository.RestaurantRepository;
 @Service
 public class AnalyticsService {
 	
-	private static final Logger logger = LoggerFactory.getLogger(AnalyticsService.class);
 
 	// Operating windows constants.
 	private LocalTime globalOpeningTime;
@@ -83,7 +80,6 @@ public class AnalyticsService {
 			allReservations = reservationRepository.findInDateRange(restaurantId, start, end);
 		}
 
-		logger.info("Reservations : " +( Objects.nonNull(allReservations) ? allReservations.size() : allReservations));
 		// 3. Generate snapshots
 		List<OccupancySnapshotDTO> intervals = new ArrayList<>();
 
@@ -102,7 +98,6 @@ public class AnalyticsService {
 
 		while (!cursor.isAfter(end) && Objects.nonNull(allReservations)) {
 
-			logger.info("Slot Iteration");
 			LocalTime currentT = cursor.toLocalTime();
 
 			// --- DAILY WINDOW CHECK ---
@@ -140,7 +135,6 @@ public class AnalyticsService {
 			cursor = cursor.plusMinutes(effectiveInterval);
 		}
 		
-		logger.info("intervals : " +( Objects.nonNull(intervals) ? intervals.size() : intervals));
 
 		return new OccupancyReportDTO(restaurantId, spaceId, intervals);
 	}

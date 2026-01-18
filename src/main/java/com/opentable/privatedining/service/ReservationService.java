@@ -9,8 +9,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.bson.types.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -35,7 +33,6 @@ import com.opentable.privatedining.repository.ReservationRepository;
 @Service
 public class ReservationService {
 	
-	private static final Logger logger = LoggerFactory.getLogger(ReservationService.class);
 
 	private final ReservationRepository reservationRepository;
 	private final RestaurantService restaurantService;
@@ -142,14 +139,12 @@ public class ReservationService {
 		// Save restaurant, optimistic lock checking.
 		restaurant.setLastReservationAt(LocalDateTime.now());
 		restaurantService.updateRestaurant(restaurant.getId(),restaurant);
-		logger.info("Reservation counts : " + reservationRepository.count());
 
 		try {
 	        return reservationRepository.save(reservationToBeCreated);
 	    } catch (DuplicateKeyException e) {
 	        // If the same user, same space, and same time exists...
-	    	logger.info("DuplicateKeyException",e);
-	        throw new BusinessRuleException("You already have a pending booking for this slot.");
+	        throw new ReservationConflictException("You already have a pending booking for this slot.");
 	    }
 	}
 	
@@ -281,17 +276,14 @@ public class ReservationService {
 				reservationToBeCreated.getStartTime(), reservationToBeCreated.getEndTime()).stream()
 				.mapToInt(Reservation::getPartySize).sum();
 
-		logger.info("Current Booking : " + currentBookedCapacity);
 		
 		// Validate requested size with available time.
 		if (currentBookedCapacity + reservationToBeCreated.getPartySize() > space.getMaxCapacity()) {
-			logger.info("No space for  : " + reservationToBeCreated.getPartySize());
 			throw new InsufficientCapacityException(reservationToBeCreated.getRestaurantId(),
 					reservationToBeCreated.getSpaceId(), reservationToBeCreated.getStartTime(),
 					reservationToBeCreated.getEndTime(), reservationToBeCreated.getPartySize());
 		}
 		
-		logger.info("Enough space for  : " + reservationToBeCreated.getPartySize());
 	}
 
 	/**
