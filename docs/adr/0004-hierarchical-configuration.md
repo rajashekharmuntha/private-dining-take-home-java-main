@@ -1,64 +1,48 @@
-\# ADR 0004: Hierarchical Configuration for Business Rules
+# ADR 0004: Hierarchical Configuration for Business Rules
 
-
-
-\## Status
-
+## Status
 Accepted
 
+## Context
+A private dining platform serves diverse restaurants and unique dining spaces. A "one-size-fits-all" approach to operating hours and reservation durations is insufficient. We need a deterministic way to resolve business settings that balances restaurant-specific requirements, system-wide defaults, and user-requested durations.
 
+## Decision
+We implemented a **Cascading Fallback Strategy** to resolve configuration values. The resolution logic differs slightly for Operating Hours versus Slot Durations.
 
-\## Context
+### 1. Operating Hours Resolution (Restaurant-Centric)
+Operating windows are maintained at the establishment level to define the valid booking range.
+* **Primary:** `Restaurant` entity level (Specific to the venue).
+* **Secondary:** `application.yml` properties (`reservation.operating-hours.open/close`).
+* **Tertiary:** Hard-coded System Defaults (**09:00** to **22:00**) as a final fail-safe.
 
-A private dining platform serves diverse restaurants. A "one-size-fits-all" approach to operating hours and slot durations is insufficient. For example, a "Rooftop Bar" space may have different operating hours than the "Main Dining Room" within the same restaurant. We need a way to resolve these settings that is both flexible for the user and safe for the system.
+### 2. Slot Duration Resolution (Space/User-Centric)
+The final duration used to calculate the `endTime` is determined by comparing configuration against intent:
 
-
-
-\## Decision
-
-We implemented a \*\*Hierarchical Fallback (Cascading) Strategy\*\* for resolving business configurations, specifically for opening/closing hours and reservation slot durations.
-
-
-
-\### Lookup Order (Precedence):
-
-1\. \*\*Space Level:\*\* Most specific. If defined, this overrides everything else.
-
-2\. \*\*Restaurant Level:\*\* If the Space has no specific config, the parent Restaurant's settings are used.
-
-3\. \*\*Global Level:\*\* If neither is defined, the system falls back to `application.yml` defaults.
-
-
-
-\## Justification
-
-1\. \*\*Flexibility:\*\* Allows restaurant owners to manage unique spaces (e.g., late-night rooms) without forcing the entire establishment to follow the same schedule.
-
-2\. \*\*Robustness:\*\* By having a "Global Level" fallback, the system avoids `NullPointerExceptions` or undefined behavior if a restaurant profile is incomplete.
-
-3\. \*\*Code Maintainability:\*\* Centralizes the "Resolution Logic" in a single helper or service method, keeping the core `ReservationService` clean.
+1. **Resolve Minimum Configured Duration:**
+   * Check **Space Level** configuration (`slotDurationMins`).
+   * If null, check **`application.yml`** properties (`reservation.default-duration-mins`).
+2. **Compare with User Request:**
+   * Calculate `userRequestedDuration` from the `endTime` provided in the payload.
+   * **Final Duration** = `Math.max(Minimum Configured, userRequestedDuration)`.
+3. **Safety Floor:**
+   * Regardless of configuration, the system enforces a minimum of **30 minutes**.
 
 
 
+## Justification
+1. **Operational Reality:** Operating hours are typically consistent across a restaurant, whereas different spaces (e.g., a large private hall vs. a small chef's table) require different turnover times (Slot Durations).
+2. **Business Protection:** Using `Math.max` for duration ensures that users cannot bypass capacity constraints by requesting artificially short durations.
+3. **Resilience:** The hierarchy ensures the system remains functional even if a restaurant or space profile is partially incomplete by falling back to global or system defaults.
 
+## Implementation Details
+* **Logic:** Centralized within the `ReservationService` using a null-coalescing pattern.
+* **End-Time Calculation:** The `endTime` is programmatically calculated and updated on the `Reservation` model before persisting to the database.
+* **Validation:** Validation against operating hours is performed *after* the final duration is resolved to ensure the calculated `endTime` does not spill over into closed hours.
 
-
-
-\## Implementation Details
-
-\- \*\*Logic:\*\* The resolution uses a "Null-Coalescing" pattern (using Java `Optional`).
-
-\- \*\*Validation:\*\* Once the configuration is resolved, the requested `startTime` and `endTime` are validated against the resolved hours.
-
-\- \*\*Reporting:\*\* Analytics use the resolved slot duration to group data consistently.
-
-
-
-\## Consequences
-
-\- \*\*Pros:\*\* High degree of customization for partners; system-wide consistency via global defaults.
-
-\- \*\*Cons:\*\* Slightly more complex data fetching as the system must check three potential sources.
-
-\- \*\*Mitigation:\*\* Results of the resolution can be cached per request context to minimize overhead.
-
+## Consequences
+* **Pros:** * High degree of customization for restaurant partners.
+    * Predictable behavior for missing data.
+    * Prevents accidental "short-slotting" that could lead to overbooking.
+* **Cons:** * Complexity: Increases the logic required before a simple `save` operation.
+    * User Feedback: Users may see their `endTime` adjusted automatically if their requested duration was shorter than the space's minimum requirement.
+* **Mitigation:** The API response returns the fully calculated `ReservationDTO` so the caller is immediately informed of the actual booked time slot.

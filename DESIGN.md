@@ -1,76 +1,52 @@
-\# Technical Design: Private Dining Reservation System
+# System Design and Architecture
+
+This document outlines the architectural patterns and design principles used in the Private Dining Reservation System.
+
+## 1. Architectural Decisions (ADRs)
+For detailed justifications on specific technical choices, please refer to our Architecture Decision Records:
+
+* [ADR 0001: Concurrency Control Strategy](./docs/adr/0001-concurrency-control.md) - Focuses on Optimistic Locking and Spring Retry.
+* [ADR 0002: Idempotency and Duplicate Detection](./docs/adr/0002-idempotency.md) - Explains the Compound Unique Index strategy.
+* [ADR 0003: Persistence Technology Choice](./docs/adr/0003-persistence-choice.md) - Justifies the use of MongoDB and the Document Model.
+* [ADR 0004: Hierarchical Configuration](./docs/adr/0004-hierarchical-config.md) - Details the cascading fallback logic for business rules.
+
+---
+
+## 2. Core Business Logic: Reservation V2
+The V2 implementation introduces an **Optimized Capacity Engine**. Unlike standard reservation systems that block a whole "table," this system treats space capacity as a fluid resource.
 
 
 
-\## 1. Business Logic Assumptions
+### The Booking Lifecycle:
+1.  **Resolution:** System resolves operating hours (Restaurant-level) and slot duration (Space-level).
+2.  **Projection:** The system calculates the `endTime` based on the hierarchy defined in ADR 0004.
+3.  **Concurrency Check:** Using a non-blocking query, the system sums the `partySize` of all existing reservations that overlap with the requested time window.
+4.  **Validation:** If `current_bookings + requested_size <= total_capacity`, the booking proceeds.
+5.  **Persistence:** The reservation is saved using a Version Check to ensure the capacity didn't change during the calculation.
 
-\- \*\*Slotting:\*\* Reservation durations are standardized (30/60 min) to optimize table turnover and simplify capacity math.
+---
 
-\- \*\*Operating Hours:\*\* Validation is enforced at the service layer to ensure `startTime` and `endTime` reside within restaurant bounds.
+## 3. Data Modeling
+We utilize a denormalized **Document-per-Restaurant** model to optimize read performance.
 
+* **Restaurant Collection:** Contains metadata and a nested list of `Space` objects. This allows us to fetch all room capacities for a restaurant in a single disk seek.
+* **Reservation Collection:** Scalable flat collection indexed for rapid overlap queries.
 
+---
 
-\## 2. Analytics \& Reporting
+## 4. Error Handling Strategy
+The system uses a **Global Exception Handler** (`@ControllerAdvice`) to map technical exceptions to meaningful REST responses:
 
-To ensure system stability under high load, the following guardrails are implemented:
+| Exception | HTTP Status | Business Meaning |
+| :--- | :--- | :--- |
+| `InsufficientCapacityException` | 409 Conflict | The requested party size exceeds available seats. |
+| `DuplicateKeyException` | 409 Conflict | This exact user/time/space combination already exists. |
+| `InvalidPartySizeException` | 400 Bad Request | Request is outside the Min/Max capacity of the space. |
+| `RestaurantNotFoundException` | 404 Not Found | The target resource does not exist. |
 
-\- \*\*Date Range Limit:\*\* Analytics queries are restricted to a maximum of 31 days to prevent long-running collection scans.
+---
 
-\- \*\*Pagination/Caps:\*\* Report results are capped at 1000 records to protect the JVM from OutOfMemory (OOM) errors.
-
-
-
-\## 3. Data Integrity
-
-\- \*\*Idempotency:\*\* A Compound Unique Index (`customerEmail`, `restaurantId`, `spaceId`, `startTime`) is used to prevent accidental duplicate submissions.
-
-\- \*\*Race Conditions:\*\* Managed via `@Version` increments on the Restaurant/Space aggregate root.
-
-
-
-High-Traffic Concurrency Strategy
-
-Explain why you didn't just use a simple if (capacity > 0) check.
-
-
-
-Optimistic Locking: Justify using @Version. Explain that it prevents "lost updates" without the performance penalty of database-level row locks (Pessimistic Locking).
-
-
-
-Transparent Retries: Explain that Spring Retry provides a seamless UX. If a collision occurs, the system self-heals rather than showing the user an error.
-
-
-
-Idempotency: Mention the Compound Unique Index (customerEmail + spaceId + startTime). Justify this as a defense against "double-click" submissions and network retries.
-
-
-
-
-
-"Assumptions and Guardrails"
-
-
-
-"Time Slot" Strategy
-
-Granularity vs. Performance trade-off.Decision: Standardized slot duration (e.g., 60 minutes).Justification: While "free-form" booking (any start/end time) is flexible, fixed slots allow the system to pre-calculate capacity and use indexed lookups. It prevents "fragmentation" of restaurant time where 15-minute gaps are left that no one can book.Scalability: By normalizing all bookings to 30/60m blocks, your reporting queries become $O(1)$ or $O(N)$ lookups instead of complex time-overlap calculations.
-
-
-
-"Analytics Safety Rails"
-
-The 31-day and 1000-record limits are excellent production-grade decisions.
-
-
-
-Decision: Strict 31-day range and 1000-record pagination/limit for reports.
-
-
-
-Justification (The "Denial of Service" Prevention): In high-traffic systems, an "All Time" report can crash the database or cause an OutOfMemory (OOM) error.
-
-
-
-Performance: By capping the range, you ensure that the query always hits the startTime index efficiently and returns in predictable time (sub-100ms).
-
+## 5. Future Scalability
+While current logic is handled in the Service layer, the architecture is prepared for:
+* **Caching:** Resolved configurations (ADR 0004) can be cached in Redis.
+* **Sharding:** The MongoDB collection is partitioned by `restaurantId` to support horizontal scaling.
