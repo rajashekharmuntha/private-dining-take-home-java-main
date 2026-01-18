@@ -16,6 +16,27 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    
+    @ExceptionHandler(InsufficientCapacityException.class)
+    public ResponseEntity<Map<String, Object>> handleInsufficientCapacity(
+            InsufficientCapacityException ex, WebRequest request) {
+        logger.warn("Insufficient capacity: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage(), request);
+    }
+    
+    @ExceptionHandler(InvalidReservationTimeException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidReservation(
+    		InvalidReservationTimeException ex, WebRequest request) {
+        logger.warn("Out of Restaurant hours: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
+    
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<Map<String, Object>> handleBusinessRuleValidationException(
+    		BusinessRuleException ex, WebRequest request) {
+        logger.warn("BusinessRule Error: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
 
     @ExceptionHandler(RestaurantNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleRestaurantNotFound(

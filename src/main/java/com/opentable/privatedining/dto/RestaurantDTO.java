@@ -2,8 +2,12 @@ package com.opentable.privatedining.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class RestaurantDTO {
 
@@ -24,6 +28,16 @@ public class RestaurantDTO {
 
     @Schema(description = "List of spaces available in the restaurant")
     private List<SpaceDTO> spaces;
+    
+    @JsonFormat(pattern = "HH:mm")
+    @Schema(type = "string", description = "Opening time of the restaurant", example = "10:00", pattern = "HH:mm")
+	private LocalTime openingTime;
+    
+    @JsonFormat(pattern = "HH:mm")
+    @Schema(type = "string", description = "Closing time of the restaurant", example = "09:00", pattern = "HH:mm")
+	private LocalTime closingTime;
+    
+    private LocalDateTime lastReservationAt;
 
     public RestaurantDTO() {
         this.spaces = new ArrayList<>();
@@ -36,6 +50,7 @@ public class RestaurantDTO {
         this.capacity = capacity;
         this.spaces = new ArrayList<>();
     }
+    
 
     public RestaurantDTO(String id, String name, String address, String cuisineType, Integer capacity, List<SpaceDTO> spaces) {
         this.id = id;
@@ -45,8 +60,28 @@ public class RestaurantDTO {
         this.capacity = capacity;
         this.spaces = spaces != null ? spaces : new ArrayList<>();
     }
+    
+    
 
-    public String getId() {
+    public RestaurantDTO(String name, String address, String cuisineType, Integer capacity, List<SpaceDTO> spaces,
+			LocalTime openingTime, LocalTime closingTime, LocalDateTime lastReservationAt) {
+		this(name, address, cuisineType, capacity);
+		this.openingTime = openingTime;
+		this.closingTime = closingTime;
+		this.lastReservationAt = lastReservationAt;
+	}
+
+    
+    
+	public RestaurantDTO(String id, String name, String address, String cuisineType, Integer capacity,
+			List<SpaceDTO> spaces, LocalTime openingTime, LocalTime closingTime, LocalDateTime lastReservationAt) {
+		this(id, name, address, cuisineType, capacity, spaces);
+		this.openingTime = openingTime;
+		this.closingTime = closingTime;
+		this.lastReservationAt = lastReservationAt;
+	}
+
+	public String getId() {
         return id;
     }
 
@@ -93,4 +128,30 @@ public class RestaurantDTO {
     public void setSpaces(List<SpaceDTO> spaces) {
         this.spaces = spaces;
     }
+
+	public LocalTime getOpeningTime() {
+		return openingTime;
+	}
+
+	public void setOpeningTime(LocalTime openingTime) {
+		this.openingTime = openingTime;
+	}
+
+	public LocalTime getClosingTime() {
+		return closingTime;
+	}
+
+	public void setClosingTime(LocalTime closingTime) {
+		this.closingTime = closingTime;
+	}
+
+	public LocalDateTime getLastReservationAt() {
+		return lastReservationAt;
+	}
+
+	public void setLastReservationAt(LocalDateTime lastReservationAt) {
+		this.lastReservationAt = lastReservationAt;
+	}
+    
+    
 }

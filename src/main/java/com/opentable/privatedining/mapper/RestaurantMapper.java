@@ -1,16 +1,16 @@
 package com.opentable.privatedining.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.bson.types.ObjectId;
+import org.springframework.stereotype.Component;
+
 import com.opentable.privatedining.dto.RestaurantDTO;
 import com.opentable.privatedining.dto.SpaceDTO;
 import com.opentable.privatedining.model.Restaurant;
 import com.opentable.privatedining.model.Space;
-import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class RestaurantMapper {
@@ -39,7 +39,10 @@ public class RestaurantMapper {
                 restaurant.getAddress(),
                 restaurant.getCuisineType(),
                 restaurant.getCapacity(),
-                spaceDTOs
+                spaceDTOs,
+                restaurant.getOpeningTime(),
+                restaurant.getClosingTime(),
+                restaurant.getLastReservationAt()
         );
     }
 
@@ -52,7 +55,10 @@ public class RestaurantMapper {
                 restaurantDTO.getName(),
                 restaurantDTO.getAddress(),
                 restaurantDTO.getCuisineType(),
-                restaurantDTO.getCapacity()
+                restaurantDTO.getCapacity(),
+                restaurantDTO.getOpeningTime(),
+                restaurantDTO.getClosingTime(),
+                restaurantDTO.getLastReservationAt()
         );
 
         if (restaurantDTO.getId() != null && !restaurantDTO.getId().isEmpty()) {
